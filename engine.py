@@ -51,10 +51,12 @@ def game_loop():
             if event.type == pygame.KEYDOWN:
                 # up arrow
                 if event.key == pygame.K_UP:
-                    y_red += -15
+                    if (y_red - 15 * (RACKET_SIZE - 1)) >= 0:  # upper border check
+                        y_red += -15
                 # down arrow
                 if event.key == pygame.K_DOWN:
-                    y_red += 15
+                    if (y_red + 15 + RACKET_SIZE) <= dis.get_size()[1]:  # lower border check
+                        y_red += 15
 
         # draw entities
         dis.fill(BLACK)
