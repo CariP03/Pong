@@ -150,7 +150,7 @@ def opponent_movement(y_blue, y_ball, y_change):
 def game_loop(display_width, display_height, red_score, blue_score):
     # pygame configs
     pygame.init()
-    pygame.key.set_repeat(50)  # allow to hold keys
+    pygame.key.set_repeat(RACKET_SPEED)  # allow to hold keys
 
     # Declare clock used to regulate game's speed
     clock = pygame.time.Clock()
@@ -227,11 +227,11 @@ def game_loop(display_width, display_height, red_score, blue_score):
                 # up arrow
                 if event.key == pygame.K_UP:
                     if y_red > 0:  # upper border check
-                        y_red += -RACKET_SPEED
+                        y_red += -1
                 # down arrow
                 if event.key == pygame.K_DOWN:
                     if y_red + racket_height < display.get_height():  # lower border check
-                        y_red += RACKET_SPEED
+                        y_red += 1
 
         # Check if one team has scored
         if not game_close:  # avoid that the game restarts after the closing command
