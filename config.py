@@ -21,7 +21,7 @@ LOSE_MESSAGE = "You Lost! Press Q-Quit or C-Play Again"
 FRAME_RATE = 30
 RACKET_OFFSET = 12  # distance between a racket and a vertical border (as the screen's width divider)
 RACKET_SPEED = 15  # number of pixels the racket moves per single button press
-MAX_POINTS = 10  # number of points necessary to win
+MAX_POINTS = 1  # number of points necessary to win
 
 # Declare entities' ratios
 RACKET_WIDTH_RATIO = 64

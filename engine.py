@@ -111,7 +111,7 @@ def draw_message(display, string, colour):
     system_font = pygame.font.Font(SYSTEM_FONT_PATH, font_size)
 
     # Render message
-    msg = system_font.render(string, True, WHITE)
+    msg = system_font.render(string, True, colour)
 
     # Determine centered position
     msg_rect = msg.get_rect()
@@ -163,20 +163,20 @@ def game_loop(display_width, display_height, red_score, blue_score):
             display.fill(BLACK)
 
             if red_score == MAX_POINTS:
-                draw_message(display, WIN_MESSAGE, RED)
+                draw_message(display, WIN_MESSAGE, WHITE)
             else:
-                draw_message(display, LOSE_MESSAGE, RED)
+                draw_message(display, LOSE_MESSAGE, WHITE)
             pygame.display.update()
 
             # read key
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN or event.type == pygame.QUIT:
                     # quit game
-                    if event.key == pygame.K_q:
+                    if event.type == pygame.QUIT or event.key == pygame.K_q:
                         game_over = False
                         game_close = True
                     # restart
-                    if event.key == pygame.K_c:
+                    elif event.key == pygame.K_c:
                         game_loop(display_width, display_height, 0, 0)
 
         # read commands
