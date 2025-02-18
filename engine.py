@@ -103,6 +103,25 @@ def draw_score(display, red, blue):
     display.blit(blue_msg, blue_rect)
 
 
+# Draw system message
+def draw_message(display, string, colour):
+    # Initialize the font used for the message
+    font_width_ratio = 20
+    font_size = max(MIN_FONT_SIZE, int(display.get_width() / font_width_ratio))
+    system_font = pygame.font.Font(SYSTEM_FONT_PATH, font_size)
+
+    # Render message
+    msg = system_font.render(string, True, WHITE)
+
+    # Determine centered position
+    msg_rect = msg.get_rect()
+    start_x = (display.get_width() - msg_rect.width) / 2
+    start_y = (display.get_height() - msg_rect.height) / 2
+
+    # Set message
+    display.blit(msg, [start_x, start_y])
+
+
 # Defines the game logic
 def game_loop(display_width, display_height, red_score, blue_score):
     # pygame configs
@@ -136,14 +155,35 @@ def game_loop(display_width, display_height, red_score, blue_score):
     y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)  # randomly determine the initial y speed
 
     # Start of the game loop
+    game_close = False
     game_over = False
-    while not game_over:
+    while not game_close:
+        # ask user what to do after game over
+        while game_over:
+            display.fill(BLACK)
+
+            if red_score == MAX_POINTS:
+                draw_message(display, WIN_MESSAGE, RED)
+            else:
+                draw_message(display, LOSE_MESSAGE, RED)
+            pygame.display.update()
+
+            # read key
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.QUIT:
+                    # quit game
+                    if event.key == pygame.K_q:
+                        game_over = False
+                        game_close = True
+                    # restart
+                    if event.key == pygame.K_c:
+                        game_loop(display_width, display_height, 0, 0)
 
         # read commands
         for event in pygame.event.get():
             # read quit command
             if event.type == pygame.QUIT:
-                game_over = True
+                game_close = True
 
             # read screen resize
             if event.type == pygame.VIDEORESIZE:
@@ -170,14 +210,21 @@ def game_loop(display_width, display_height, red_score, blue_score):
                         y_red += RACKET_SPEED
 
         # Check if one team has scored
-        point = point_scored(display, x_ball, y_ball)
-        if point == "red":
-            red_score += 1
-            game_loop(display_width, display_height, red_score, blue_score)
+        if not game_close:  # avoid that the game restarts after the closing command
+            point = point_scored(display, x_ball, y_ball)
+            if point == "red":
+                red_score += 1
+                if red_score == MAX_POINTS:
+                    game_over = True
+                else:
+                    game_loop(display_width, display_height, red_score, blue_score)
 
-        if point == "blue":
-            blue_score += 1
-            game_loop(display_width, display_height, red_score, blue_score)
+            if point == "blue":
+                blue_score += 1
+                if blue_score == MAX_POINTS:
+                    game_over = True
+                else:
+                    game_loop(display_width, display_height, red_score, blue_score)
 
         # Calculate ball movement
         if border_collision(display, y_ball):
