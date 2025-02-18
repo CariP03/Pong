@@ -2,53 +2,77 @@ from config import *
 import random
 import pygame
 
-
-# function that draws the two rackets
-def draw_rackets(dis, red_coord, blue_coord):
-    # red racket
-    for x in range(RACKET_SIZE):
-        pygame.draw.rect(dis, RED, [dis.get_size()[0] / 12, red_coord - (x * 15), 10, 15])
-    # blue racket
-    for x in range(RACKET_SIZE):
-        pygame.draw.rect(dis, BLUE, [dis.get_size()[0] - dis.get_size()[0] / 12, blue_coord - (x * 15), 10, 15])
+# define global variables
+racket_width = 0
+racket_height = 0
+ball_size = 0
 
 
-# function that check for collisions between the ball and one of the horizontal borders
-def border_collision(dis, x_ball, y_ball):
-    if y_ball + BALL_SIZE >= dis.get_size()[1] or y_ball <= 0:
+# function that calculate racket's dimensions based on display's size
+def calculate_racket_size(display):
+    global racket_width, racket_height
+    racket_width = display.get_width() / RACKET_WIDTH_RATIO
+    racket_height = display.get_height() / RACKET_HEIGHT_RATIO
+
+
+# function that calculate ball's dimensions based on display's size
+def calculate_ball_size(display):
+    global ball_size
+    ball_size = display.get_width() / BALL_RATIO
+
+
+# Draws the two rackets
+def draw_rackets(display, red_coord, blue_coord):
+    # Red racket
+    pygame.draw.rect(display, RED, [display.get_width() / RACKET_OFFSET, red_coord, racket_width, racket_height])
+    # Blue racket
+    pygame.draw.rect(display, BLUE, [display.get_width() - display.get_width() / RACKET_OFFSET, blue_coord,
+                                     racket_width, racket_height])
+
+
+# Check for collisions between the ball and one of the horizontal borders
+def border_collision(display, y_ball):
+    if y_ball + ball_size >= display.get_height() or y_ball <= 0:
         return True
     else:
         return False
 
 
-# function that check for collisions between the ball and one of rackets
-def racket_collision(dis, x_ball, y_ball, red_racket, blue_racket):
-    # red racket collision
-    if x_ball <= (dis.get_size()[0] / 12) + 10 and red_racket - 15 * (RACKET_SIZE - 1) <= y_ball <= red_racket:
+# Check for collisions between the ball and one of rackets
+def racket_collision(display, x_ball, y_ball, red_racket, blue_racket):
+    # Red racket collision
+    if (x_ball <= (display.get_width() / RACKET_OFFSET) + racket_width
+            and red_racket <= y_ball <= red_racket + racket_height):
         return True
-    # blue racket collision
-    if (x_ball >= (dis.get_size()[0] - dis.get_size()[0] / 12) - 10 and
-            blue_racket - 15 * (RACKET_SIZE - 1) <= y_ball <= blue_racket):
+
+    # Blue racket collision
+    if (x_ball + ball_size >= (display.get_width() - display.get_width() / RACKET_OFFSET)
+            and blue_racket <= y_ball <= blue_racket + racket_height):
         return True
 
     return False
 
 
-# function that checks whether the ball has passed one of the rackets
-# returns the name of the team that scored a point
-def point_scored(dis, x_ball, y_ball):
-    if x_ball <= (dis.get_size()[0] / 12):
+# Check whether the ball has passed one of the rackets
+# Return the name of the team that has scored
+def point_scored(display, x_ball, y_ball):
+    if x_ball < (display.get_width() / RACKET_OFFSET):
         return "blue"
-    if x_ball >= (dis.get_size()[0] - dis.get_size()[0] / 12):
+    if x_ball > (display.get_width() - display.get_width() / RACKET_OFFSET) + racket_width:
         return "red"
 
 
-# function to print score
-def draw_score(red, blue, display):
+# Draw score at the top of the window
+def draw_score(display, red, blue):
+    # Initialize the font used for the score
+    font_width_ratio = 20
+    font_size = max(MIN_FONT_SIZE, int(display.get_width() / font_width_ratio))
+    score_font = pygame.font.Font(SCORE_FONT_PATH, font_size)
+
     # Render the messages for each score
-    red_msg = SCORE_FONT.render(str(red), True, RED)
-    blue_msg = SCORE_FONT.render(str(blue), True, BLUE)
-    colon_msg = SCORE_FONT.render(":", True, WHITE)
+    red_msg = score_font.render(str(red), True, RED)
+    blue_msg = score_font.render(str(blue), True, BLUE)
+    colon_msg = score_font.render(":", True, WHITE)
 
     # Get the rectangles (rect) for each rendered text
     red_rect = red_msg.get_rect()
@@ -63,7 +87,8 @@ def draw_score(red, blue, display):
 
     # Compute the starting x position to center the score on the screen
     start_x = (display.get_width() - total_width) / 2
-    y_position = display.get_size()[1] / 20
+    y_pct_offset = 20
+    y_position = display.get_height() / y_pct_offset
 
     # Set the position of the red score
     red_rect.topleft = (start_x, y_position)
@@ -78,81 +103,99 @@ def draw_score(red, blue, display):
     display.blit(blue_msg, blue_rect)
 
 
-# function that defines the game logic
-def game_loop(red_score, blue_score):
+# Defines the game logic
+def game_loop(display_width, display_height, red_score, blue_score):
+    # pygame configs
     pygame.init()
+    pygame.key.set_repeat(50)  # allow to hold keys
+
+    # Declare clock used to regulate game's speed
     clock = pygame.time.Clock()
 
-    # allow held keys
-    pygame.key.set_repeat(50)
-
-    # create display
-    dis_width = 800
-    dis_height = 600
-
-    dis = pygame.display.set_mode((dis_width, dis_height))
+    # Configure display
+    display = pygame.display.set_mode((display_width, display_height), pygame.RESIZABLE)
     pygame.display.set_caption("PONG")
 
-    # rackets coordinates
-    y_red = dis_height / 2 - RACKET_SIZE
-    y_blue = dis_height / 2 - RACKET_SIZE
+    # Calculate initial entities' size
+    calculate_racket_size(display)
+    calculate_ball_size(display)
 
-    # ball coordinates
-    x_ball = dis_width / 2 - BALL_SIZE
-    y_ball = dis_height / 2 + BALL_SIZE
-    x_change = 10 * random.choice([-1, 1])  # high initial x-speed
-    y_change = random.randrange(-5, 5)
+    # Rackets initial vertical coordinates
+    y_red = display_height / 2 - racket_height / 2  # y_red is the top pixel
+    y_blue = y_red
 
+    # Ball initial coordinates
+    x_ball = display_width / 2 - ball_size / 2  # x_ball is the leftmost pixel
+    y_ball = display_height / 2 - ball_size / 2  # y_ball is the top pixel
+
+    # Ball initial throw
+    x_initial_speed = display_width / X_SPEED_RATIO  # determine speed based on display's width
+    x_change = x_initial_speed * random.choice([-1, 1])  # determine the side towards which the ball moves
+
+    y_max_initial_speed = int(display_height / Y_SPEED_RATIO)  # determine speed based on display's height
+    y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)  # randomly determine the initial y speed
+
+    # Start of the game loop
     game_over = False
     while not game_over:
 
         # read commands
         for event in pygame.event.get():
-            # add quit command
+            # read quit command
             if event.type == pygame.QUIT:
                 game_over = True
+
+            # read screen resize
+            if event.type == pygame.VIDEORESIZE:
+                display_width = event.w
+                display_height = event.h
+                display = pygame.display.set_mode((display_width, display_height), pygame.RESIZABLE)
+
+                calculate_racket_size(display)  # recalculate rackets' dimensions based on new display
+                calculate_ball_size(display)  # recalculate ball's size based on new display
+
+                # Recalculate speed based on display's size
+                x_change *= (display_width / X_SPEED_RATIO)
+                y_change *= (display_height / Y_SPEED_RATIO)
 
             # read moving commands
             if event.type == pygame.KEYDOWN:
                 # up arrow
                 if event.key == pygame.K_UP:
-                    if (y_red - 15 * (RACKET_SIZE - 1)) >= 0:  # upper border check
-                        y_red += -15
+                    if y_red > 0:  # upper border check
+                        y_red += -RACKET_SPEED
                 # down arrow
                 if event.key == pygame.K_DOWN:
-                    if (y_red + 15 + RACKET_SIZE) <= dis.get_size()[1]:  # lower border check
-                        y_red += 15
+                    if y_red + racket_height < display.get_height():  # lower border check
+                        y_red += RACKET_SPEED
 
-        # draw entities
-        dis.fill(BLACK)
-        draw_rackets(dis, y_red, y_blue)
-
-        # calculate ball movement
-        if border_collision(dis, x_ball, y_ball):
-            y_change = -y_change  # change trajectory
-            print("BORDER")
-
-        if racket_collision(dis, x_ball, y_ball, y_red, y_blue):
-            x_change = -x_change
-            print("RACKET")
-
-        x_ball += x_change
-        y_ball += y_change
-        pygame.draw.rect(dis, WHITE, [x_ball, y_ball, BALL_SIZE, BALL_SIZE])  # draw the ball
-
-        # check if one team has scored
-        point = point_scored(dis, x_ball, y_ball)
+        # Check if one team has scored
+        point = point_scored(display, x_ball, y_ball)
         if point == "red":
             red_score += 1
-            game_loop(red_score, blue_score)
+            game_loop(display_width, display_height, red_score, blue_score)
 
         if point == "blue":
             blue_score += 1
-            game_loop(red_score, blue_score)
+            game_loop(display_width, display_height, red_score, blue_score)
 
-        draw_score(red_score, blue_score, dis)
+        # Calculate ball movement
+        if border_collision(display, y_ball):
+            y_change = -y_change  # change trajectory
 
+        if racket_collision(display, x_ball, y_ball, y_red, y_blue):
+            x_change = -x_change
+
+        x_ball += x_change
+        y_ball += y_change
+
+        # Draw entities
+        display.fill(BLACK)
+        draw_rackets(display, y_red, y_blue)
+        pygame.draw.rect(display, WHITE, [x_ball, y_ball, ball_size, ball_size])  # draw the ball
+        draw_score(display, red_score, blue_score)
         pygame.display.update()
+
         clock.tick(FRAME_RATE)
 
     pygame.quit()
