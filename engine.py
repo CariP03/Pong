@@ -7,6 +7,8 @@ racket_width = 0
 racket_height = 0
 ball_size = 0
 
+sleep_timer = 0  # number of sleep cycles for AI
+
 
 # function that calculate racket's dimensions based on display's size
 def calculate_racket_size(display):
@@ -123,19 +125,44 @@ def draw_message(display, string, colour):
 
 
 # Determine blue racket movement
-def opponent_movement(y_blue, y_ball, y_change):
-    racket_center = y_blue + racket_height / 2
-    ball_center = y_ball + ball_size / 2
+def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
+    global sleep_timer
 
-    tolerance = 10  # number of pixels
-    if abs(racket_center - ball_center) < tolerance:  # avoid flickering
+    # Randomly make no movement
+    if random.random() < SLEEP_PROB:
         return 0
-    # blue racket is below the ball
-    elif racket_center > ball_center:  # keep moving till the center of the racket is aligned
-        return -1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
-    # blue racket is above the ball
-    elif racket_center < ball_center:
-        return 1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
+
+    # Force AI to sleep for a few cycles
+    if sleep_timer > 0:
+        sleep_timer -= 1
+        return 0
+
+    else:
+        racket_center = y_blue + racket_height / 2
+        ball_center = y_ball + ball_size / 2
+
+        # Randomly sleep when the ball is moving towards opponent
+        if x_change < 0 and random.random() < SLEEP_PROB:
+            sleep_timer = random.randint(MIN_SLEEP, MAX_SLEEP)
+            return 0
+
+        else:
+            movement = ((1000 / RACKET_SPEED) / FRAME_RATE)  # number of pixels that the AI can move per cycle
+
+            if abs(racket_center - ball_center) < movement:  # avoid flickering
+                return 0
+            # blue racket is below the ball
+            elif racket_center > ball_center:  # keep moving till the center of the racket is aligned
+                if random.random() < SPEED_PROB:
+                    return -movement * SPEED_PEN  # randomly reduce speed
+                else:
+                    return -movement
+            # blue racket is above the ball
+            elif racket_center < ball_center:
+                if random.random() < SPEED_PROB:
+                    return movement * SPEED_PEN
+                else:
+                    return movement
 
 
 # Defines the game logic
@@ -147,9 +174,13 @@ def game_loop(display_width, display_height, red_score, blue_score):
     # Declare clock used to regulate game's speed
     clock = pygame.time.Clock()
 
+    # Reset AI
+    global sleep_timer
+    sleep_timer = 0
+
     # Configure display
     display = pygame.display.set_mode((display_width, display_height), pygame.RESIZABLE)
-    pygame.display.set_caption("PONG")
+    pygame.display.set_caption(DISPLAY_CAPTION)
 
     # Calculate initial entities' size
     calculate_racket_size(display)
@@ -248,12 +279,14 @@ def game_loop(display_width, display_height, red_score, blue_score):
 
         if racket_collision(display, x_ball, y_ball, y_red, y_blue):
             x_change = -x_change
+            # Randomly change y trajectory
+            y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)
 
         x_ball += x_change
         y_ball += y_change
 
         # Calculate opponent movement
-        y_blue += opponent_movement(y_blue, y_ball, y_change)
+        y_blue += opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change)
 
         # Draw entities
         display.fill(BLACK)
