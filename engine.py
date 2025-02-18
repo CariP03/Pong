@@ -1,26 +1,62 @@
 from config import *
 import random
 import pygame
+import ctypes
 
 # define global variables
 racket_width = 0
 racket_height = 0
 ball_size = 0
+x_initial_speed = 0
+y_max_initial_speed = 0
+racket_speed = 0
 
 sleep_timer = 0  # number of sleep cycles for AI
 
 
-# function that calculate racket's dimensions based on display's size
-def calculate_racket_size(display):
-    global racket_width, racket_height
-    racket_width = display.get_width() / RACKET_WIDTH_RATIO
-    racket_height = display.get_height() / RACKET_HEIGHT_RATIO
+# Calculate aspect ratio
+def calculate_ratio(display):
+    width = display.get_width()
+    height = display.get_height()
+    aspect_ratio = width / height
+
+    if abs(aspect_ratio - (16 / 9)) < 0.1:
+        return "16:9"
+    elif abs(aspect_ratio - (21 / 9)) < 0.1:
+        return "21:9"
+    else:
+        return "4:3"
 
 
-# function that calculate ball's dimensions based on display's size
-def calculate_ball_size(display):
-    global ball_size
-    ball_size = display.get_width() / BALL_RATIO
+# Calculate game's parameters based on display's resolution
+def calculate_dynamic_parameters(display):
+    global racket_width, racket_height, ball_size, x_initial_speed, y_max_initial_speed, racket_speed
+
+    ratio = calculate_ratio(display)
+
+    if ratio == "16:9":
+        racket_width = display.get_width() / RACKET_WIDTH_RATIO_HDTV
+        racket_height = display.get_height() / RACKET_HEIGHT_RATIO_HDTV
+        ball_size = display.get_height() / BALL_RATIO_HDTV
+        x_initial_speed = display.get_width() / X_SPEED_RATIO_HDTV
+        y_max_initial_speed = int(display.get_height() / Y_SPEED_RATIO_HDTV)
+        racket_speed = RACKET_SPEED_HDTV
+
+    if ratio == "21:9":
+        racket_width = display.get_width() / RACKET_WIDTH_RATIO_UW
+        racket_height = display.get_height() / RACKET_HEIGHT_RATIO_UW
+        ball_size = display.get_height() / BALL_RATIO_UW
+        x_initial_speed = display.get_width() / X_SPEED_RATIO_UW
+        y_max_initial_speed = int(display.get_height() / Y_SPEED_RATIO_UW)
+        racket_speed = RACKET_SPEED_UW
+
+    if ratio == "4:3":
+        racket_width = display.get_width() / RACKET_WIDTH_RATIO_TV
+        racket_height = display.get_height() / RACKET_HEIGHT_RATIO_TV
+        ball_size = display.get_height() / BALL_RATIO_TV
+        x_initial_speed = display.get_width() / X_SPEED_RATIO_UW
+        y_max_initial_speed = int(display.get_height() / Y_SPEED_RATIO_UW)
+        racket_speed = RACKET_SPEED_TV
 
 
 # Draws the two rackets
@@ -129,7 +165,7 @@ def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
     global sleep_timer
 
     # Randomly make no movement
-    if random.random() < SLEEP_PROB:
+    if random.random() < SKIP_PROB:
         return 0
 
     # Force AI to sleep for a few cycles
@@ -147,7 +183,7 @@ def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
             return 0
 
         else:
-            movement = ((1000 / RACKET_SPEED) / FRAME_RATE)  # number of pixels that the AI can move per cycle
+            movement = ((1000 / racket_speed) / FRAME_RATE)  # number of pixels that the AI can move per cycle
 
             if abs(racket_center - ball_center) < movement:  # avoid flickering
                 return 0
@@ -167,9 +203,7 @@ def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
 
 # Defines the game logic
 def game_loop(display_width, display_height, red_score, blue_score):
-    # pygame configs
-    pygame.init()
-    pygame.key.set_repeat(RACKET_SPEED)  # allow to hold keys
+    ctypes.windll.user32.SetProcessDPIAware()  # Ignore Windows' DPI Scaling
 
     # Declare clock used to regulate game's speed
     clock = pygame.time.Clock()
@@ -182,9 +216,9 @@ def game_loop(display_width, display_height, red_score, blue_score):
     display = pygame.display.set_mode((display_width, display_height), pygame.RESIZABLE)
     pygame.display.set_caption(DISPLAY_CAPTION)
 
-    # Calculate initial entities' size
-    calculate_racket_size(display)
-    calculate_ball_size(display)
+    # Calculate parameters
+    calculate_dynamic_parameters(display)
+    pygame.key.set_repeat(racket_speed)  # allow to hold keys
 
     # Rackets initial vertical coordinates
     y_red = display_height / 2 - racket_height / 2  # y_red is the top pixel
@@ -195,10 +229,7 @@ def game_loop(display_width, display_height, red_score, blue_score):
     y_ball = display_height / 2 - ball_size / 2  # y_ball is the top pixel
 
     # Ball initial throw
-    x_initial_speed = display_width / X_SPEED_RATIO  # determine speed based on display's width
     x_change = x_initial_speed * random.choice([-1, 1])  # determine the side towards which the ball moves
-
-    y_max_initial_speed = int(display_height / Y_SPEED_RATIO)  # determine speed based on display's height
     y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)  # randomly determine the initial y speed
 
     # Start of the game loop
@@ -236,14 +267,9 @@ def game_loop(display_width, display_height, red_score, blue_score):
             if event.type == pygame.VIDEORESIZE:
                 display_width = event.w
                 display_height = event.h
-                display = pygame.display.set_mode((display_width, display_height), pygame.RESIZABLE)
+                display = pygame.display.set_mode((display_width, display_height))
 
-                calculate_racket_size(display)  # recalculate rackets' dimensions based on new display
-                calculate_ball_size(display)  # recalculate ball's size based on new display
-
-                # Recalculate speed based on display's size
-                x_change *= (display_width / X_SPEED_RATIO)
-                y_change *= (display_height / Y_SPEED_RATIO)
+                calculate_dynamic_parameters(display)
 
             # read moving commands
             if event.type == pygame.KEYDOWN:

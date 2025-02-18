@@ -1,7 +1,5 @@
 import pygame
 
-pygame.init()
-
 # Declare colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -21,7 +19,6 @@ LOSE_MESSAGE = "You Lost! Press Q-Quit or C-Play Again"
 # Game parameters
 FRAME_RATE = 30
 RACKET_OFFSET = 12  # distance between a racket and a vertical border (as the screen's width divider)
-RACKET_SPEED = 4  # delay in ms between the transmission of the same key while holding it
 MAX_POINTS = 10  # number of points necessary to win
 
 # AI parameters
@@ -33,8 +30,36 @@ SPEED_PROB = 0.5  # probability of penalty to speed
 SPEED_PEN = 0.5  # percentage penalty to speed if an error occurs
 
 # Declare entities' ratios
-RACKET_WIDTH_RATIO = 64
-RACKET_HEIGHT_RATIO = 8
-BALL_RATIO = 48
-X_SPEED_RATIO = 40
-Y_SPEED_RATIO = 90
+# For 4:3
+RACKET_WIDTH_RATIO_TV = 64
+RACKET_HEIGHT_RATIO_TV = 8
+BALL_RATIO_TV = 36
+X_SPEED_RATIO_TV = 40
+Y_SPEED_RATIO_TV = 90
+RACKET_SPEED_TV = 4  # delay in ms between the transmission of the same key while holding it
+# For 16:9
+RACKET_WIDTH_RATIO_HDTV = 64
+RACKET_HEIGHT_RATIO_HDTV = 6
+BALL_RATIO_HDTV = 24
+X_SPEED_RATIO_HDTV = 48
+Y_SPEED_RATIO_HDTV = 90
+RACKET_SPEED_HDTV = 3
+# For 21:9
+RACKET_WIDTH_RATIO_UW = 96
+RACKET_HEIGHT_RATIO_UW = 6
+BALL_RATIO_UW = 24
+X_SPEED_RATIO_UW = 80
+Y_SPEED_RATIO_UW = 100
+RACKET_SPEED_UW = 2
+
+# Declare resolutions
+RESOLUTIONS = [
+    (800, 600),
+    (1280, 720),
+    (1600, 900),
+    (1920, 1080),
+    (2560, 1440),
+    (3840, 2160),
+    (2560, 1080),
+    (3440, 1440)
+]
