@@ -1,5 +1,3 @@
-import time
-
 from config import *
 import random
 import pygame
@@ -45,8 +43,43 @@ def point_scored(dis, x_ball, y_ball):
         return "red"
 
 
+# function to print score
+def draw_score(red, blue, display):
+    # Render the messages for each score
+    red_msg = SCORE_FONT.render(str(red), True, RED)
+    blue_msg = SCORE_FONT.render(str(blue), True, BLUE)
+    colon_msg = SCORE_FONT.render(":", True, WHITE)
+
+    # Get the rectangles (rect) for each rendered text
+    red_rect = red_msg.get_rect()
+    colon_rect = colon_msg.get_rect()
+    blue_rect = blue_msg.get_rect()
+
+    # Define a spacing between the elements (in pixels)
+    spacing = 10
+
+    # Calculate the total width of the score display (red score + spacing + colon + spacing + blue score)
+    total_width = red_rect.width + colon_rect.width + blue_rect.width + 2 * spacing
+
+    # Compute the starting x position to center the score on the screen
+    start_x = (display.get_width() - total_width) / 2
+    y_position = display.get_size()[1] / 20
+
+    # Set the position of the red score
+    red_rect.topleft = (start_x, y_position)
+    # Set the position of the colon right after the red score, with spacing
+    colon_rect.topleft = (red_rect.topright[0] + spacing, y_position)
+    # Set the position of the blue score right after the colon, with spacing
+    blue_rect.topleft = (colon_rect.topright[0] + spacing, y_position)
+
+    # Draw the messages on the display
+    display.blit(red_msg, red_rect)
+    display.blit(colon_msg, colon_rect)
+    display.blit(blue_msg, blue_rect)
+
+
 # function that defines the game logic
-def game_loop():
+def game_loop(red_score, blue_score):
     pygame.init()
     clock = pygame.time.Clock()
 
@@ -109,8 +142,15 @@ def game_loop():
 
         # check if one team has scored
         point = point_scored(dis, x_ball, y_ball)
-        if point == "red" or point == "blue":
-            game_loop()
+        if point == "red":
+            red_score += 1
+            game_loop(red_score, blue_score)
+
+        if point == "blue":
+            blue_score += 1
+            game_loop(red_score, blue_score)
+
+        draw_score(red_score, blue_score, dis)
 
         pygame.display.update()
         clock.tick(FRAME_RATE)

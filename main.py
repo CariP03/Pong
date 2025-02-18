@@ -3,4 +3,4 @@ import engine
 
 if __name__ == "__main__":
     pygame.init()
-    engine.game_loop()
+    engine.game_loop(0, 0)
