@@ -127,20 +127,20 @@ def opponent_movement(y_blue, y_ball, y_change):
     # ball moving up
     if y_change < 0:
         # blue racket is below the ball
-        if y_blue > y_ball:
+        if y_blue > y_ball + ball_size:
             return -RACKET_SPEED
         # blue racket is above the ball
-        elif y_blue < y_ball:
+        elif y_blue + racket_height < y_ball:
             return RACKET_SPEED
         else:
             return 0
     # ball moving down
     else:
         # blue racket is below the ball
-        if y_blue > y_ball:
+        if y_blue > y_ball + ball_size:
             return -RACKET_SPEED
         # blue racket is above the ball
-        elif y_blue < y_ball:
+        elif y_blue + racket_height < y_ball:
             return RACKET_SPEED
         else:
             return 0
