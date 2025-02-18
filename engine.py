@@ -124,26 +124,18 @@ def draw_message(display, string, colour):
 
 # Determine blue racket movement
 def opponent_movement(y_blue, y_ball, y_change):
-    # ball moving up
-    if y_change < 0:
-        # blue racket is below the ball
-        if y_blue > y_ball + ball_size:
-            return -1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
-        # blue racket is above the ball
-        elif y_blue + racket_height < y_ball:
-            return 1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
-        else:
-            return 0
-    # ball moving down
-    else:
-        # blue racket is below the ball
-        if y_blue > y_ball + ball_size:
-            return -1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
-        # blue racket is above the ball
-        elif y_blue + racket_height < y_ball:
-            return 1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
-        else:
-            return 0
+    racket_center = y_blue + racket_height / 2
+    ball_center = y_ball + ball_size / 2
+
+    tolerance = 10  # number of pixels
+    if abs(racket_center - ball_center) < tolerance:  # avoid flickering
+        return 0
+    # blue racket is below the ball
+    elif racket_center > ball_center:  # keep moving till the center of the racket is aligned
+        return -1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
+    # blue racket is above the ball
+    elif racket_center < ball_center:
+        return 1 * ((1000 / RACKET_SPEED) / FRAME_RATE)
 
 
 # Defines the game logic
