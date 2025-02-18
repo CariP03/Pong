@@ -1,6 +1,7 @@
-import random
+import time
 
 from config import *
+import random
 import pygame
 
 
@@ -33,6 +34,15 @@ def racket_collision(dis, x_ball, y_ball, red_racket, blue_racket):
         return True
 
     return False
+
+
+# function that checks whether the ball has passed one of the rackets
+# returns the name of the team that scored a point
+def point_scored(dis, x_ball, y_ball):
+    if x_ball <= (dis.get_size()[0] / 12):
+        return "blue"
+    if x_ball >= (dis.get_size()[0] - dis.get_size()[0] / 12):
+        return "red"
 
 
 # function that defines the game logic
@@ -84,7 +94,7 @@ def game_loop():
         dis.fill(BLACK)
         draw_rackets(dis, y_red, y_blue)
 
-        # calculate ball movement (no collisions)
+        # calculate ball movement
         if border_collision(dis, x_ball, y_ball):
             y_change = -y_change  # change trajectory
             print("BORDER")
@@ -97,8 +107,12 @@ def game_loop():
         y_ball += y_change
         pygame.draw.rect(dis, WHITE, [x_ball, y_ball, BALL_SIZE, BALL_SIZE])  # draw the ball
 
-        pygame.display.update()
+        # check if one team has scored
+        point = point_scored(dis, x_ball, y_ball)
+        if point == "red" or point == "blue":
+            game_loop()
 
+        pygame.display.update()
         clock.tick(FRAME_RATE)
 
     pygame.quit()
