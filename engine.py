@@ -122,6 +122,30 @@ def draw_message(display, string, colour):
     display.blit(msg, [start_x, start_y])
 
 
+# Determine blue racket movement
+def opponent_movement(y_blue, y_ball, y_change):
+    # ball moving up
+    if y_change < 0:
+        # blue racket is below the ball
+        if y_blue > y_ball:
+            return -RACKET_SPEED
+        # blue racket is above the ball
+        elif y_blue < y_ball:
+            return RACKET_SPEED
+        else:
+            return 0
+    # ball moving down
+    else:
+        # blue racket is below the ball
+        if y_blue > y_ball:
+            return -RACKET_SPEED
+        # blue racket is above the ball
+        elif y_blue < y_ball:
+            return RACKET_SPEED
+        else:
+            return 0
+
+
 # Defines the game logic
 def game_loop(display_width, display_height, red_score, blue_score):
     # pygame configs
@@ -235,6 +259,9 @@ def game_loop(display_width, display_height, red_score, blue_score):
 
         x_ball += x_change
         y_ball += y_change
+
+        # Calculate opponent movement
+        y_blue += opponent_movement(y_blue, y_ball, y_change)
 
         # Draw entities
         display.fill(BLACK)
