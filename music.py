@@ -13,7 +13,7 @@ class Mixer:
 
     __RED_GOAL = "resources/sounds/Point-Red.wav"
     __BLUE_GOAL = "resources/sounds/Point-Blue.wav"
-    __GOAL_VOLUME = 0.5
+    __GOAL_VOLUME = 0.7
     __red_sound = pygame.mixer.Sound(__RED_GOAL)
     __red_sound.set_volume(__GOAL_VOLUME)
     __blue_sound = pygame.mixer.Sound(__BLUE_GOAL)
@@ -59,6 +59,11 @@ class Mixer:
     def play_background(cls):
         Mixer.__background_sound.play(-1)
 
+    # Stop background music
+    @classmethod
+    def stop_background(cls):
+        Mixer.__background_sound.stop()
+
     # Play menu music
     @classmethod
     def play_menu(cls):
@@ -69,7 +74,35 @@ class Mixer:
     def play_win(cls):
         Mixer.__win_sound.play(-1)
 
+    # Stop win music
+    @classmethod
+    def stop_win(cls):
+        Mixer.__win_sound.stop()
+
     # Play lose music
     @classmethod
     def play_lose(cls):
         Mixer.__lose_sound.play()
+
+    # Stop lose music
+    @classmethod
+    def stop_lose(cls):
+        Mixer.__lose_sound.stop()
+
+    # Call the appropriate game over music
+    # Receive the winner name as argument ("red" or "blue")
+    @classmethod
+    def play_game_over(cls, winner):
+        Mixer.stop_background()
+
+        if winner == "red":
+            Mixer.play_win()
+        else:
+            Mixer.play_lose()
+
+    # Reset music after game over
+    @classmethod
+    def reset_music(cls):
+        Mixer.stop_win()
+        Mixer.stop_lose()
+        Mixer.play_background()

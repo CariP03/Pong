@@ -228,7 +228,9 @@ def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
 
 # Defines the game logic
 def game_loop(display_width, display_height):
-    ctypes.windll.user32.SetProcessDPIAware()  # Ignore Windows' DPI Scaling
+    ctypes.windll.user32.SetProcessDPIAware()  # ignore Windows' DPI Scaling
+
+    Mixer.play_background()  # start background music
 
     # Declare clock used to regulate game's speed
     clock = pygame.time.Clock()
@@ -273,9 +275,12 @@ def game_loop(display_width, display_height):
                     elif event.key == pygame.K_c:
                         game_over = False
                         y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
-                        # reset scores
+
+                        # Reset scores
                         red_score = 0
                         blue_score = 0
+
+                        Mixer.reset_music()
 
         # read commands
         for event in pygame.event.get():
@@ -310,6 +315,7 @@ def game_loop(display_width, display_height):
                 Mixer.play_red_point()
                 if red_score == MAX_POINTS:
                     game_over = True
+                    Mixer.play_game_over("red")
                 else:
                     y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
 
@@ -318,6 +324,7 @@ def game_loop(display_width, display_height):
                 Mixer.play_blue_point()
                 if blue_score == MAX_POINTS:
                     game_over = True
+                    Mixer.play_game_over("blue")
                 else:
                     y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
 
