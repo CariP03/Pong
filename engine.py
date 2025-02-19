@@ -7,10 +7,11 @@ import ctypes
 # define global variables
 racket_width = 0
 racket_height = 0
+racket_speed = 0  # delay in ms between the transmission of the same key while holding it
+
 ball_size = 0
-x_initial_speed = 0
-y_max_initial_speed = 0
-racket_speed = 0
+ball_x_speed = 0
+ball_y_speed_limit = 0
 
 sleep_timer = 0  # number of sleep cycles for AI
 
@@ -31,7 +32,7 @@ def calculate_ratio(display):
 
 # Calculate game's parameters based on display's resolution
 def calculate_dynamic_parameters(display):
-    global racket_width, racket_height, ball_size, x_initial_speed, y_max_initial_speed, racket_speed
+    global racket_width, racket_height, ball_size, ball_x_speed, ball_y_speed_limit, racket_speed
 
     ratio = calculate_ratio(display)
 
@@ -39,72 +40,34 @@ def calculate_dynamic_parameters(display):
         racket_width = display.get_width() / RACKET_WIDTH_RATIO_HDTV
         racket_height = display.get_height() / RACKET_HEIGHT_RATIO_HDTV
         ball_size = display.get_height() / BALL_RATIO_HDTV
-        x_initial_speed = display.get_width() / X_SPEED_RATIO_HDTV
-        y_max_initial_speed = int(display.get_height() / Y_SPEED_RATIO_HDTV)
+        ball_x_speed = display.get_width() / X_SPEED_RATIO_HDTV
+        ball_y_speed_limit = int(display.get_height() / Y_SPEED_RATIO_HDTV)
         racket_speed = RACKET_SPEED_HDTV
 
     if ratio == "21:9":
         racket_width = display.get_width() / RACKET_WIDTH_RATIO_UW
         racket_height = display.get_height() / RACKET_HEIGHT_RATIO_UW
         ball_size = display.get_height() / BALL_RATIO_UW
-        x_initial_speed = display.get_width() / X_SPEED_RATIO_UW
-        y_max_initial_speed = int(display.get_height() / Y_SPEED_RATIO_UW)
+        ball_x_speed = display.get_width() / X_SPEED_RATIO_UW
+        ball_y_speed_limit = int(display.get_height() / Y_SPEED_RATIO_UW)
         racket_speed = RACKET_SPEED_UW
 
     if ratio == "4:3":
         racket_width = display.get_width() / RACKET_WIDTH_RATIO_TV
         racket_height = display.get_height() / RACKET_HEIGHT_RATIO_TV
         ball_size = display.get_height() / BALL_RATIO_TV
-        x_initial_speed = display.get_width() / X_SPEED_RATIO_UW
-        y_max_initial_speed = int(display.get_height() / Y_SPEED_RATIO_UW)
+        ball_x_speed = display.get_width() / X_SPEED_RATIO_UW
+        ball_y_speed_limit = int(display.get_height() / Y_SPEED_RATIO_UW)
         racket_speed = RACKET_SPEED_TV
 
 
 # Draws the two rackets
-def draw_rackets(display, red_coord, blue_coord):
+def draw_rackets(display, red_y, blue_y):
     # Red racket
-    pygame.draw.rect(display, RED, [display.get_width() / RACKET_OFFSET, red_coord, racket_width, racket_height])
+    pygame.draw.rect(display, RED, [display.get_width() / RACKET_OFFSET, red_y, racket_width, racket_height])
     # Blue racket
-    pygame.draw.rect(display, BLUE, [display.get_width() - display.get_width() / RACKET_OFFSET, blue_coord,
+    pygame.draw.rect(display, BLUE, [display.get_width() - display.get_width() / RACKET_OFFSET, blue_y,
                                      racket_width, racket_height])
-
-
-# Check for collisions between the ball and one of the horizontal borders
-def border_collision(display, y_ball):
-    if y_ball + ball_size >= display.get_height() or y_ball <= 0:
-        return True
-    else:
-        return False
-
-
-# Check for collisions between the ball and one of rackets
-def racket_collision(display, x_ball, y_ball, red_racket, blue_racket):
-    # Check if the top or bottom pixels of the ball are at the same height of the received racket
-    def check_vertical_intersection(y_racket):
-        return (y_racket <= y_ball <= y_racket + racket_height or
-                y_racket <= y_ball + ball_size <= y_racket + racket_height)
-
-    # Red racket collision
-    # Check if the leftmost pixel of the ball is at the same width of the red racket
-    if x_ball <= display.get_width() / RACKET_OFFSET + racket_width and check_vertical_intersection(red_racket):
-        return True
-
-    # Blue racket collision
-    # Check if the rightmost pixel of the ball is at the same width of the blue racket
-    if (x_ball + ball_size >= display.get_width() - display.get_width() / RACKET_OFFSET and
-            check_vertical_intersection(blue_racket)):
-        return True
-
-    return False
-
-
-# Check whether the ball has passed one of the rackets
-# Return the name of the team that has scored
-def point_scored(display, x_ball, y_ball):
-    if x_ball < (display.get_width() / RACKET_OFFSET):
-        return "blue"
-    if x_ball > (display.get_width() - display.get_width() / RACKET_OFFSET) + racket_width:
-        return "red"
 
 
 # Draw score at the top of the window
@@ -169,30 +132,70 @@ def draw_message(display, string, colour):
 
 # Set all entities to their starting position
 def reset_entities(display):
+    global ball_x_speed
+
     display_width = display.get_width()
     display_height = display.get_height()
 
     # Rackets initial vertical coordinates
-    y_red = display_height / 2 - racket_height / 2  # y_red is the top pixel
-    y_blue = y_red
+    red_y = display_height / 2 - racket_height / 2  # red_y is the top pixel
+    blue_y = red_y
 
     # Ball initial coordinates
-    x_ball = display_width / 2 - ball_size / 2  # x_ball is the leftmost pixel
-    y_ball = display_height / 2 - ball_size / 2  # y_ball is the top pixel
+    ball_x = display_width / 2 - ball_size / 2  # ball_x is the leftmost pixel
+    ball_y = display_height / 2 - ball_size / 2  # ball_y is the top pixel
 
     # Ball initial throw
-    x_change = x_initial_speed * random.choice([-1, 1])  # determine the side towards which the ball moves
-    y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)  # randomly determine the initial y speed
+    ball_x_speed = ball_x_speed * random.choice([-1, 1])  # determine the side towards which the ball moves
+    ball_y_speed = random.randrange(-ball_y_speed_limit, ball_y_speed_limit)  # randomly determine the initial y speed
 
     # Reset AI
     global sleep_timer
     sleep_timer = 0
 
-    return y_red, y_blue, x_ball, y_ball, x_change, y_change
+    return red_y, blue_y, ball_x, ball_y, ball_y_speed
+
+
+# Check for collisions between the ball and one of the horizontal borders
+def border_collision(display, ball_y):
+    if ball_y + ball_size >= display.get_height() or ball_y <= 0:
+        return True
+    else:
+        return False
+
+
+# Check for collisions between the ball and one of rackets
+def racket_collision(display, ball_x, ball_y, red_y, blue_y):
+    # Check if the top or bottom pixels of the ball are at the same height of the received racket
+    def check_vertical_intersection(y_racket):
+        return (y_racket <= ball_y <= y_racket + racket_height or
+                y_racket <= ball_y + ball_size <= y_racket + racket_height)
+
+    # Red racket collision
+    # Check if the leftmost pixel of the ball is at the same width of the red racket
+    if ball_x <= display.get_width() / RACKET_OFFSET + racket_width and check_vertical_intersection(red_y):
+        return True
+
+    # Blue racket collision
+    # Check if the rightmost pixel of the ball is at the same width of the blue racket
+    if (ball_x + ball_size >= display.get_width() - display.get_width() / RACKET_OFFSET and
+            check_vertical_intersection(blue_y)):
+        return True
+
+    return False
+
+
+# Check whether the ball has passed one of the rackets
+# Return the name of the team that has scored
+def point_scored(display, ball_x):
+    if ball_x < (display.get_width() / RACKET_OFFSET):
+        return "blue"
+    if ball_x > (display.get_width() - display.get_width() / RACKET_OFFSET) + racket_width:
+        return "red"
 
 
 # Determine blue racket movement
-def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
+def opponent_movement(blue_y, ball_y):
     global sleep_timer
 
     # Randomly make no movement
@@ -205,11 +208,11 @@ def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
         return 0
 
     else:
-        racket_center = y_blue + racket_height / 2
-        ball_center = y_ball + ball_size / 2
+        racket_center = blue_y + racket_height / 2
+        ball_center = ball_y + ball_size / 2
 
         # Randomly sleep when the ball is moving towards opponent
-        if x_change < 0 and random.random() < SLEEP_PROB:
+        if ball_x_speed < 0 and random.random() < SLEEP_PROB:
             sleep_timer = random.randint(MIN_SLEEP, MAX_SLEEP)
             return 0
 
@@ -234,6 +237,8 @@ def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
 
 # Defines the game logic
 def game_loop(display_width, display_height):
+    global ball_x_speed
+
     ctypes.windll.user32.SetProcessDPIAware()  # ignore Windows' DPI Scaling
 
     Mixer.play_background()  # start background music
@@ -250,7 +255,7 @@ def game_loop(display_width, display_height):
     pygame.key.set_repeat(racket_speed)  # allow to hold keys
 
     # Set entities initial positions
-    y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
+    red_y, blue_y, ball_x, ball_y, ball_y_speed = reset_entities(display)
 
     # Initialize scores
     red_score = 0
@@ -280,7 +285,7 @@ def game_loop(display_width, display_height):
                     # restart
                     elif event.key == pygame.K_c:
                         game_over = False
-                        y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
+                        red_y, blue_y, ball_x, ball_y, ball_y_speed = reset_entities(display)
 
                         # Reset scores
                         red_score = 0
@@ -306,16 +311,16 @@ def game_loop(display_width, display_height):
             if event.type == pygame.KEYDOWN:
                 # up arrow
                 if event.key == pygame.K_UP:
-                    if y_red > 0:  # upper border check
-                        y_red += -1
+                    if red_y > 0:  # upper border check
+                        red_y += -1
                 # down arrow
                 if event.key == pygame.K_DOWN:
-                    if y_red + racket_height < display.get_height():  # lower border check
-                        y_red += 1
+                    if red_y + racket_height < display.get_height():  # lower border check
+                        red_y += 1
 
         # Check if one team has scored
         if not game_close:  # avoid that the game restarts after the closing command
-            point = point_scored(display, x_ball, y_ball)
+            point = point_scored(display, ball_x)
             if point == "red":
                 red_score += 1
                 Mixer.play_red_point()
@@ -323,7 +328,7 @@ def game_loop(display_width, display_height):
                     game_over = True
                     Mixer.play_game_over("red")
                 else:
-                    y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
+                    red_y, blue_y, ball_x, ball_y, ball_y_speed = reset_entities(display)
 
             if point == "blue":
                 blue_score += 1
@@ -332,29 +337,29 @@ def game_loop(display_width, display_height):
                     game_over = True
                     Mixer.play_game_over("blue")
                 else:
-                    y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
+                    red_y, blue_y, ball_x, ball_y, ball_y_speed = reset_entities(display)
 
         # Calculate ball movement
-        if border_collision(display, y_ball):
-            y_change = -y_change  # change trajectory
+        if border_collision(display, ball_y):
+            ball_y_speed = -ball_y_speed  # change trajectory
             Mixer.play_bounce()
 
-        if racket_collision(display, x_ball, y_ball, y_red, y_blue):
-            x_change = -x_change
+        if racket_collision(display, ball_x, ball_y, red_y, blue_y):
+            ball_x_speed = -ball_x_speed
             # Randomly change y trajectory
-            y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)
+            ball_y_speed = random.randrange(-ball_y_speed_limit, ball_y_speed_limit)
             Mixer.play_bounce()
 
-        x_ball += x_change
-        y_ball += y_change
+        ball_x += ball_x_speed
+        ball_y += ball_y_speed
 
         # Calculate opponent movement
-        y_blue += opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change)
+        blue_y += opponent_movement(blue_y, ball_y)
 
         # Draw entities
         display.fill(BLACK)
-        draw_rackets(display, y_red, y_blue)
-        pygame.draw.rect(display, WHITE, [x_ball, y_ball, ball_size, ball_size])  # draw the ball
+        draw_rackets(display, red_y, blue_y)
+        pygame.draw.rect(display, WHITE, [ball_x, ball_y, ball_size, ball_size])  # draw ball
         draw_score(display, red_score, blue_score)
         pygame.display.update()
 
