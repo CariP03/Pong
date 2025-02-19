@@ -161,6 +161,30 @@ def draw_message(display, string, colour):
     display.blit(msg, [start_x, start_y])
 
 
+# Set all entities to their starting position
+def reset_entities(display):
+    display_width = display.get_width()
+    display_height = display.get_height()
+
+    # Rackets initial vertical coordinates
+    y_red = display_height / 2 - racket_height / 2  # y_red is the top pixel
+    y_blue = y_red
+
+    # Ball initial coordinates
+    x_ball = display_width / 2 - ball_size / 2  # x_ball is the leftmost pixel
+    y_ball = display_height / 2 - ball_size / 2  # y_ball is the top pixel
+
+    # Ball initial throw
+    x_change = x_initial_speed * random.choice([-1, 1])  # determine the side towards which the ball moves
+    y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)  # randomly determine the initial y speed
+
+    # Reset AI
+    global sleep_timer
+    sleep_timer = 0
+
+    return y_red, y_blue, x_ball, y_ball, x_change, y_change
+
+
 # Determine blue racket movement
 def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
     global sleep_timer
@@ -203,35 +227,26 @@ def opponent_movement(display, y_blue, x_ball, y_ball, x_change, y_change):
 
 
 # Defines the game logic
-def game_loop(display_width, display_height, red_score, blue_score):
+def game_loop(display_width, display_height):
     ctypes.windll.user32.SetProcessDPIAware()  # Ignore Windows' DPI Scaling
 
     # Declare clock used to regulate game's speed
     clock = pygame.time.Clock()
 
-    # Reset AI
-    global sleep_timer
-    sleep_timer = 0
-
     # Configure display
-    display = pygame.display.set_mode((display_width, display_height), pygame.RESIZABLE)
+    display = pygame.display.set_mode((display_width, display_height))
     pygame.display.set_caption(DISPLAY_CAPTION)
 
-    # Calculate parameters
+    # Calculate parameters based on display's resolution
     calculate_dynamic_parameters(display)
     pygame.key.set_repeat(racket_speed)  # allow to hold keys
 
-    # Rackets initial vertical coordinates
-    y_red = display_height / 2 - racket_height / 2  # y_red is the top pixel
-    y_blue = y_red
+    # Set entities initial positions
+    y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
 
-    # Ball initial coordinates
-    x_ball = display_width / 2 - ball_size / 2  # x_ball is the leftmost pixel
-    y_ball = display_height / 2 - ball_size / 2  # y_ball is the top pixel
-
-    # Ball initial throw
-    x_change = x_initial_speed * random.choice([-1, 1])  # determine the side towards which the ball moves
-    y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)  # randomly determine the initial y speed
+    # Initialize scores
+    red_score = 0
+    blue_score = 0
 
     # Start of the game loop
     game_close = False
@@ -256,7 +271,11 @@ def game_loop(display_width, display_height, red_score, blue_score):
                         game_close = True
                     # restart
                     elif event.key == pygame.K_c:
-                        game_loop(display_width, display_height, 0, 0)
+                        game_over = False
+                        y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
+                        # reset scores
+                        red_score = 0
+                        blue_score = 0
 
         # read commands
         for event in pygame.event.get():
@@ -292,7 +311,7 @@ def game_loop(display_width, display_height, red_score, blue_score):
                 if red_score == MAX_POINTS:
                     game_over = True
                 else:
-                    game_loop(display_width, display_height, red_score, blue_score)
+                    y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
 
             if point == "blue":
                 blue_score += 1
@@ -300,7 +319,7 @@ def game_loop(display_width, display_height, red_score, blue_score):
                 if blue_score == MAX_POINTS:
                     game_over = True
                 else:
-                    game_loop(display_width, display_height, red_score, blue_score)
+                    y_red, y_blue, x_ball, y_ball, x_change, y_change = reset_entities(display)
 
         # Calculate ball movement
         if border_collision(display, y_ball):

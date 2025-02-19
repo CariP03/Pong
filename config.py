@@ -34,7 +34,7 @@ MENU_VOLUME = 0.2
 # Game parameters
 FRAME_RATE = 30
 RACKET_OFFSET = 12  # distance between a racket and a vertical border (as the screen's width divider)
-MAX_POINTS = 10  # number of points necessary to win
+MAX_POINTS = 2  # number of points necessary to win
 
 # AI parameters
 SKIP_PROB = 0.2  # probability of skipping a cycle
