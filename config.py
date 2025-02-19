@@ -19,7 +19,7 @@ LOSE_MESSAGE = "You Lost! Press Q-Quit or C-Play Again"
 # Game parameters
 FRAME_RATE = 30
 RACKET_OFFSET = 12  # distance between a racket and a vertical border (as the screen's width divider)
-MAX_POINTS = 2  # number of points necessary to win
+MAX_POINTS = 100  # number of points necessary to win
 
 # AI parameters
 SKIP_PROB = 0.1  # probability of skipping a cycle

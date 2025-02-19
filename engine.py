@@ -195,7 +195,7 @@ def point_scored(display, ball_x):
 
 
 # Determine blue racket movement
-def opponent_movement(blue_y, ball_y):
+def AI_move(blue_y, ball_y):
     global sleep_timer
 
     # Randomly make no movement
@@ -254,8 +254,45 @@ def adjust_movement(display_height, racket_y, movement):
         return 0
 
 
+# Determine the movement of a racket for single player mode
+def single_player_move(display_height, red_y, keys):
+    movement = ((1000 / racket_speed) / FRAME_RATE)
+
+    # Up arrow
+    if keys[pygame.K_UP]:
+        red_y += adjust_movement(display_height, red_y, -movement)
+    # Down arrow
+    if keys[pygame.K_DOWN]:
+        red_y += adjust_movement(display_height, red_y, movement)
+
+    return red_y
+
+
+# Determine the movement of the rackets for multiplayer mode
+def multiplayer_move(display_height, red_y, blue_y, keys):
+    movement = ((1000 / racket_speed) / FRAME_RATE)
+
+    # Red movement
+    # W (up movement)
+    if keys[pygame.K_w]:
+        red_y += adjust_movement(display_height, red_y, -movement)
+    # S (down movement)
+    if keys[pygame.K_s]:
+        red_y += adjust_movement(display_height, red_y, movement)
+
+    # Blue movement
+    # Up arrow
+    if keys[pygame.K_UP]:
+        blue_y += adjust_movement(display_height, blue_y, -movement)
+    # Down arrow
+    if keys[pygame.K_DOWN]:
+        blue_y += adjust_movement(display_height, blue_y, movement)
+
+    return red_y, blue_y
+
+
 # Defines the game logic
-def game_loop(display_width, display_height):
+def game_loop(display_width, display_height, multiplayer):
     global ball_x_speed
 
     ctypes.windll.user32.SetProcessDPIAware()  # ignore Windows' DPI Scaling
@@ -326,14 +363,17 @@ def game_loop(display_width, display_height):
 
                 calculate_dynamic_parameters(display)
 
-            # read moving commands
-            if event.type == pygame.KEYDOWN:
-                # up arrow
-                if event.key == pygame.K_UP:
-                    red_y += adjust_movement(display_height, red_y, -1)
-                # down arrow
-                if event.key == pygame.K_DOWN:
-                    red_y += adjust_movement(display_height, red_y, 1)
+        # Determine movement of rackets
+        keys = pygame.key.get_pressed()
+
+        if not multiplayer:
+            # Determine player movement
+            red_y = single_player_move(display_height, red_y, keys)
+            # Determine AI movement
+            blue_y += adjust_movement(display_height, blue_y, AI_move(blue_y, ball_y))
+        else:
+            # Determine both players movement
+            red_y, blue_y = multiplayer_move(display_height, red_y, blue_y, keys)
 
         # Check if one team has scored
         if not game_close:  # avoid that the game restarts after the closing command
@@ -369,9 +409,6 @@ def game_loop(display_width, display_height):
 
         ball_x += ball_x_speed
         ball_y += ball_y_speed
-
-        # Calculate opponent movement
-        blue_y += adjust_movement(display_height, blue_y, opponent_movement(blue_y, ball_y))
 
         # Draw entities
         display.fill(BLACK)

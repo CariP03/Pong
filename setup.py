@@ -14,3 +14,18 @@ def select_resolution():
             return RESOLUTIONS[choice]
         except (ValueError, IndexError) as e:
             print("Please enter a valid input")
+
+
+# Ask user to choose between single player and multiplayer mode
+# Return true if multiplayer is chosen
+def is_multiplayer():
+    while True:
+        print("Select between single player mode (S) or multiplayer mode (M)")
+        choice = input("Enter your choice: ")
+
+        if choice.casefold() == "s":
+            return False
+        elif choice.casefold() == "m":
+            return True
+        else:
+            print("Please enter a valid input")
