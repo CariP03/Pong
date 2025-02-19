@@ -235,6 +235,25 @@ def opponent_movement(blue_y, ball_y):
                     return movement
 
 
+# Check if the movement of a racket is illegal and eventually fix it
+def adjust_movement(display_height, racket_y, movement):
+    # moving upward
+    if movement < 0:
+        if racket_y + movement < 0:  # illegal position
+            return movement - (racket_y + movement)  # set racket at the border
+        else:
+            return movement
+    # moving downward
+    elif movement > 0:
+        if racket_y + racket_height + movement > display_height:
+            return display_height - (racket_y + racket_height)
+        else:
+            return movement
+    # no movement
+    else:
+        return 0
+
+
 # Defines the game logic
 def game_loop(display_width, display_height):
     global ball_x_speed
@@ -311,12 +330,10 @@ def game_loop(display_width, display_height):
             if event.type == pygame.KEYDOWN:
                 # up arrow
                 if event.key == pygame.K_UP:
-                    if red_y > 0:  # upper border check
-                        red_y += -1
+                    red_y += adjust_movement(display_height, red_y, -1)
                 # down arrow
                 if event.key == pygame.K_DOWN:
-                    if red_y + racket_height < display.get_height():  # lower border check
-                        red_y += 1
+                    red_y += adjust_movement(display_height, red_y, 1)
 
         # Check if one team has scored
         if not game_close:  # avoid that the game restarts after the closing command
@@ -354,7 +371,7 @@ def game_loop(display_width, display_height):
         ball_y += ball_y_speed
 
         # Calculate opponent movement
-        blue_y += opponent_movement(blue_y, ball_y)
+        blue_y += adjust_movement(display_height, blue_y, opponent_movement(blue_y, ball_y))
 
         # Draw entities
         display.fill(BLACK)

@@ -22,11 +22,11 @@ RACKET_OFFSET = 12  # distance between a racket and a vertical border (as the sc
 MAX_POINTS = 2  # number of points necessary to win
 
 # AI parameters
-SKIP_PROB = 0.2  # probability of skipping a cycle
+SKIP_PROB = 0.1  # probability of skipping a cycle
 SLEEP_PROB = 0.1  # probability of sleep
 MIN_SLEEP = 10  # minimum number of sleep cycles
 MAX_SLEEP = 20  # maximum number of sleep cycles
-SPEED_PROB = 0.5  # probability of penalty to speed
+SPEED_PROB = 0.6  # probability of penalty to speed
 SPEED_PEN = 0.5  # percentage penalty to speed if an error occurs
 
 # Declare entities' ratios
