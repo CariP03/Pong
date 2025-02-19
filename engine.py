@@ -307,7 +307,7 @@ def game_loop(display_width, display_height):
             point = point_scored(display, x_ball, y_ball)
             if point == "red":
                 red_score += 1
-                play_red_point()
+                Mixer.play_red_point()
                 if red_score == MAX_POINTS:
                     game_over = True
                 else:
@@ -315,7 +315,7 @@ def game_loop(display_width, display_height):
 
             if point == "blue":
                 blue_score += 1
-                play_blue_point()
+                Mixer.play_blue_point()
                 if blue_score == MAX_POINTS:
                     game_over = True
                 else:
@@ -324,13 +324,13 @@ def game_loop(display_width, display_height):
         # Calculate ball movement
         if border_collision(display, y_ball):
             y_change = -y_change  # change trajectory
-            play_bounce()
+            Mixer.play_bounce()
 
         if racket_collision(display, x_ball, y_ball, y_red, y_blue):
             x_change = -x_change
             # Randomly change y trajectory
             y_change = random.randrange(-y_max_initial_speed, y_max_initial_speed)
-            play_bounce()
+            Mixer.play_bounce()
 
         x_ball += x_change
         y_ball += y_change

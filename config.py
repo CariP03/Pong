@@ -16,21 +16,6 @@ DISPLAY_CAPTION = "PONG"
 WIN_MESSAGE = "You Won! Press Q-Quit or C-Play Again"
 LOSE_MESSAGE = "You Lost! Press Q-Quit or C-Play Again"
 
-# Declare sounds
-BOUNCE = "resources/sounds/Pop.ogg"
-BOUNCE_VOLUME = 0.5
-RED_GOAL = "resources/sounds/Point-Red.wav"
-BLUE_GOAL = "resources/sounds/Point-Blue.wav"
-GOAL_VOLUME = 0.5
-BACKGROUND = "resources/sounds/Background-1.mp3"
-BACKGROUND_VOLUME = 0.2
-WIN = "resources/sounds/Gameover-Win.mp3"
-WIN_VOLUME = 0.2
-LOSE = "resources/sounds/Gameover-Lose.mp3"
-LOSE_VOLUME = 0.5
-MENU = "resources/sounds/Menu.mp3"
-MENU_VOLUME = 0.2
-
 # Game parameters
 FRAME_RATE = 30
 RACKET_OFFSET = 12  # distance between a racket and a vertical border (as the screen's width divider)

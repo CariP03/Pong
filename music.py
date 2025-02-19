@@ -1,50 +1,75 @@
-from config import *
+import pygame
 
 
-# Play bounce sound
-def play_bounce():
-    bounce_sound = pygame.mixer.Sound(BOUNCE)
-    bounce_sound.set_volume(BOUNCE_VOLUME)
-    bounce_sound.play()
+# Contains methods to play different sounds
+class Mixer:
+    pygame.mixer.init()
 
+    # Class attributes
+    __BOUNCE = "resources/sounds/Pop.ogg"
+    __BOUNCE_VOLUME = 0.5
+    __bounce_sound = pygame.mixer.Sound(__BOUNCE)
+    __bounce_sound.set_volume(__BOUNCE_VOLUME)
 
-# Play goal sound for red
-def play_red_point():
-    goal_sound = pygame.mixer.Sound(RED_GOAL)
-    goal_sound.set_volume(GOAL_VOLUME)
-    goal_sound.play()
+    __RED_GOAL = "resources/sounds/Point-Red.wav"
+    __BLUE_GOAL = "resources/sounds/Point-Blue.wav"
+    __GOAL_VOLUME = 0.5
+    __red_sound = pygame.mixer.Sound(__RED_GOAL)
+    __red_sound.set_volume(__GOAL_VOLUME)
+    __blue_sound = pygame.mixer.Sound(__BLUE_GOAL)
+    __blue_sound.set_volume(__GOAL_VOLUME)
 
+    __BACKGROUND = "resources/sounds/Background-1.mp3"
+    __BACKGROUND_VOLUME = 0.2
+    __background_sound = pygame.mixer.Sound(__BACKGROUND)
+    __background_sound.set_volume(__BACKGROUND_VOLUME)
 
-# Play goal sound for blue
-def play_blue_point():
-    goal_sound = pygame.mixer.Sound(BLUE_GOAL)
-    goal_sound.set_volume(GOAL_VOLUME)
-    goal_sound.play()
+    __MENU = "resources/sounds/Menu.mp3"
+    __MENU_VOLUME = 0.2
+    __menu_sound = pygame.mixer.Sound(__MENU)
+    __menu_sound.set_volume(__MENU_VOLUME)
 
+    __WIN = "resources/sounds/Gameover-Win.mp3"
+    __WIN_VOLUME = 0.2
+    __win_sound = pygame.mixer.Sound(__WIN)
+    __win_sound.set_volume(__WIN_VOLUME)
 
-# Play background music
-def play_background():
-    background_sound = pygame.mixer.Sound(BACKGROUND)
-    background_sound.set_volume(BACKGROUND_VOLUME)
-    background_sound.play(-1)
+    __LOSE = "resources/sounds/Gameover-Lose.mp3"
+    __LOSE_VOLUME = 0.5
+    __lose_sound = pygame.mixer.Sound(__LOSE)
+    __lose_sound.set_volume(__LOSE_VOLUME)
 
+    # Play bounce sound
+    @classmethod
+    def play_bounce(cls):
+        Mixer.__bounce_sound.play()
 
-# Play menu music
-def play_menu():
-    menu_sound = pygame.mixer.Sound(MENU)
-    menu_sound.set_volume(MENU_VOLUME)
-    menu_sound.play()
+    # Play goal sound for red
+    @classmethod
+    def play_red_point(cls):
+        Mixer.__red_sound.play()
 
+    # Play goal sound for blue
+    @classmethod
+    def play_blue_point(cls):
+        Mixer.__blue_sound.play()
 
-# Play win music
-def play_win():
-    win_sound = pygame.mixer.Sound(WIN)
-    win_sound.set_volume(WIN_VOLUME)
-    win_sound.play(-1)
+    # Play background music
+    @classmethod
+    def play_background(cls):
+        Mixer.__background_sound.play(-1)
 
+    # Play menu music
+    @classmethod
+    def play_menu(cls):
+        Mixer.__menu_sound.play()
 
-# Play lose music
-def play_lose():
-    win_sound = pygame.mixer.Sound(LOSE)
-    win_sound.set_volume(LOSE_VOLUME)
-    win_sound.play()
+    # Play win music
+    @classmethod
+    def play_win(cls):
+        Mixer.__win_sound.play(-1)
+
+    # Play lose music
+    @classmethod
+    def play_lose(cls):
+        Mixer.__lose_sound.play()
