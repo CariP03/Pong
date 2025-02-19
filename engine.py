@@ -79,14 +79,20 @@ def border_collision(display, y_ball):
 
 # Check for collisions between the ball and one of rackets
 def racket_collision(display, x_ball, y_ball, red_racket, blue_racket):
+    # Check if the top or bottom pixels of the ball are at the same height of the received racket
+    def check_vertical_intersection(y_racket):
+        return (y_racket <= y_ball <= y_racket + racket_height or
+                y_racket <= y_ball + ball_size <= y_racket + racket_height)
+
     # Red racket collision
-    if (x_ball <= (display.get_width() / RACKET_OFFSET) + racket_width
-            and red_racket <= y_ball <= red_racket + racket_height):
+    # Check if the leftmost pixel of the ball is at the same width of the red racket
+    if x_ball <= display.get_width() / RACKET_OFFSET + racket_width and check_vertical_intersection(red_racket):
         return True
 
     # Blue racket collision
-    if (x_ball + ball_size >= (display.get_width() - display.get_width() / RACKET_OFFSET)
-            and blue_racket <= y_ball <= blue_racket + racket_height):
+    # Check if the rightmost pixel of the ball is at the same width of the blue racket
+    if (x_ball + ball_size >= display.get_width() - display.get_width() / RACKET_OFFSET and
+            check_vertical_intersection(blue_racket)):
         return True
 
     return False
