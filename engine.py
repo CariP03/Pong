@@ -57,8 +57,8 @@ def calculate_dynamic_parameters(display):
         racket_width = display.get_width() / ratios["4:3"]["RACKET_WIDTH_RATIO_TV"]
         racket_height = display.get_height() / ratios["4:3"]["RACKET_HEIGHT_RATIO_TV"]
         ball_size = display.get_height() / ratios["4:3"]["BALL_RATIO_TV"]
-        ball_x_speed = display.get_width() / ratios["4:3"]["X_SPEED_RATIO_UW"]
-        ball_y_speed_limit = int(display.get_height() / ratios["4:3"]["Y_SPEED_RATIO_UW"])
+        ball_x_speed = display.get_width() / ratios["4:3"]["X_SPEED_RATIO_TV"]
+        ball_y_speed_limit = int(display.get_height() / ratios["4:3"]["Y_SPEED_RATIO_TV"])
         racket_speed = ratios["4:3"]["RACKET_SPEED_TV"]
 
 
