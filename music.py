@@ -1,4 +1,5 @@
 import pygame
+from config import GameConfig
 
 
 # Contains methods to play different sounds
@@ -6,38 +7,25 @@ class Mixer:
     pygame.mixer.init()
 
     # Class attributes
-    __BOUNCE = "resources/sounds/Pop.ogg"
-    __BOUNCE_VOLUME = 0.5
-    __bounce_sound = pygame.mixer.Sound(__BOUNCE)
-    __bounce_sound.set_volume(__BOUNCE_VOLUME)
+    __bounce_sound = pygame.mixer.Sound(GameConfig.configs["music"]["BOUNCE"])
+    __bounce_sound.set_volume(GameConfig.configs["music"]["BOUNCE_VOLUME"])
 
-    __RED_GOAL = "resources/sounds/Point-Red.wav"
-    __BLUE_GOAL = "resources/sounds/Point-Blue.wav"
-    __GOAL_VOLUME = 0.7
-    __red_sound = pygame.mixer.Sound(__RED_GOAL)
-    __red_sound.set_volume(__GOAL_VOLUME)
-    __blue_sound = pygame.mixer.Sound(__BLUE_GOAL)
-    __blue_sound.set_volume(__GOAL_VOLUME)
+    __red_sound = pygame.mixer.Sound(GameConfig.configs["music"]["RED_GOAL"])
+    __red_sound.set_volume(GameConfig.configs["music"]["GOAL_VOLUME"])
+    __blue_sound = pygame.mixer.Sound(GameConfig.configs["music"]["BLUE_GOAL"])
+    __blue_sound.set_volume(GameConfig.configs["music"]["GOAL_VOLUME"])
 
-    __BACKGROUND = "resources/sounds/Background-1.mp3"
-    __BACKGROUND_VOLUME = 0.2
-    __background_sound = pygame.mixer.Sound(__BACKGROUND)
-    __background_sound.set_volume(__BACKGROUND_VOLUME)
+    __background_sound = pygame.mixer.Sound(GameConfig.configs["music"]["BACKGROUND"])
+    __background_sound.set_volume(GameConfig.configs["music"]["BACKGROUND_VOLUME"])
 
-    __MENU = "resources/sounds/Menu.mp3"
-    __MENU_VOLUME = 0.2
-    __menu_sound = pygame.mixer.Sound(__MENU)
-    __menu_sound.set_volume(__MENU_VOLUME)
+    __menu_sound = pygame.mixer.Sound(GameConfig.configs["music"]["MENU"])
+    __menu_sound.set_volume(GameConfig.configs["music"]["MENU_VOLUME"])
 
-    __WIN = "resources/sounds/Gameover-Win.mp3"
-    __WIN_VOLUME = 0.2
-    __win_sound = pygame.mixer.Sound(__WIN)
-    __win_sound.set_volume(__WIN_VOLUME)
+    __win_sound = pygame.mixer.Sound(GameConfig.configs["music"]["WIN"])
+    __win_sound.set_volume(GameConfig.configs["music"]["WIN_VOLUME"])
 
-    __LOSE = "resources/sounds/Gameover-Lose.mp3"
-    __LOSE_VOLUME = 0.5
-    __lose_sound = pygame.mixer.Sound(__LOSE)
-    __lose_sound.set_volume(__LOSE_VOLUME)
+    __lose_sound = pygame.mixer.Sound(GameConfig.configs["music"]["LOSE"])
+    __lose_sound.set_volume(GameConfig.configs["music"]["LOSE_VOLUME"])
 
     # Play bounce sound
     @classmethod

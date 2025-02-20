@@ -1,4 +1,4 @@
-from config import *
+from config import GameConfig
 
 
 # Ask user to choose a resolution
@@ -7,12 +7,12 @@ def select_resolution():
     while True:
         try:
             print("Select a resolution:")
-            for i, res in enumerate(RESOLUTIONS):
+            for i, res in enumerate(GameConfig.configs["resolutions"]):
                 print(f"{i + 1}: {res[0]}x{res[1]}")
             choice = int(input("Enter resolution's number: ")) - 1
 
-            return RESOLUTIONS[choice]
-        except (ValueError, IndexError) as e:
+            return GameConfig.configs["resolutions"][choice]
+        except (ValueError, IndexError):
             print("Please enter a valid input")
 
 

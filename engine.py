@@ -1,5 +1,5 @@
-from config import *
-from music import *
+from config import GameConfig
+from music import Mixer
 import random
 import pygame
 import ctypes
@@ -36,51 +36,55 @@ def calculate_dynamic_parameters(display):
 
     ratio = calculate_ratio(display)
 
+    ratios = GameConfig.configs["ratios"]
     if ratio == "16:9":
-        racket_width = display.get_width() / RACKET_WIDTH_RATIO_HDTV
-        racket_height = display.get_height() / RACKET_HEIGHT_RATIO_HDTV
-        ball_size = display.get_height() / BALL_RATIO_HDTV
-        ball_x_speed = display.get_width() / X_SPEED_RATIO_HDTV
-        ball_y_speed_limit = int(display.get_height() / Y_SPEED_RATIO_HDTV)
-        racket_speed = RACKET_SPEED_HDTV
+        racket_width = display.get_width() / ratios["16:9"]["RACKET_WIDTH_RATIO_HDTV"]
+        racket_height = display.get_height() / ratios["16:9"]["RACKET_HEIGHT_RATIO_HDTV"]
+        ball_size = display.get_height() / ratios["16:9"]["BALL_RATIO_HDTV"]
+        ball_x_speed = display.get_width() / ratios["16:9"]["X_SPEED_RATIO_HDTV"]
+        ball_y_speed_limit = int(display.get_height() / ratios["16:9"]["Y_SPEED_RATIO_HDTV"])
+        racket_speed = ratios["16:9"]["RACKET_SPEED_HDTV"]
 
     if ratio == "21:9":
-        racket_width = display.get_width() / RACKET_WIDTH_RATIO_UW
-        racket_height = display.get_height() / RACKET_HEIGHT_RATIO_UW
-        ball_size = display.get_height() / BALL_RATIO_UW
-        ball_x_speed = display.get_width() / X_SPEED_RATIO_UW
-        ball_y_speed_limit = int(display.get_height() / Y_SPEED_RATIO_UW)
-        racket_speed = RACKET_SPEED_UW
+        racket_width = display.get_width() / ratios["21:9"]["RACKET_WIDTH_RATIO_UW"]
+        racket_height = display.get_height() / ratios["21:9"]["RACKET_HEIGHT_RATIO_UW"]
+        ball_size = display.get_height() / ratios["21:9"]["BALL_RATIO_UW"]
+        ball_x_speed = display.get_width() / ratios["21:9"]["X_SPEED_RATIO_UW"]
+        ball_y_speed_limit = int(display.get_height() / ratios["21:9"]["Y_SPEED_RATIO_UW"])
+        racket_speed = ratios["21:9"]["RACKET_SPEED_UW"]
 
     if ratio == "4:3":
-        racket_width = display.get_width() / RACKET_WIDTH_RATIO_TV
-        racket_height = display.get_height() / RACKET_HEIGHT_RATIO_TV
-        ball_size = display.get_height() / BALL_RATIO_TV
-        ball_x_speed = display.get_width() / X_SPEED_RATIO_UW
-        ball_y_speed_limit = int(display.get_height() / Y_SPEED_RATIO_UW)
-        racket_speed = RACKET_SPEED_TV
+        racket_width = display.get_width() / ratios["4:3"]["RACKET_WIDTH_RATIO_TV"]
+        racket_height = display.get_height() / ratios["4:3"]["RACKET_HEIGHT_RATIO_TV"]
+        ball_size = display.get_height() / ratios["4:3"]["BALL_RATIO_TV"]
+        ball_x_speed = display.get_width() / ratios["4:3"]["X_SPEED_RATIO_UW"]
+        ball_y_speed_limit = int(display.get_height() / ratios["4:3"]["Y_SPEED_RATIO_UW"])
+        racket_speed = ratios["4:3"]["RACKET_SPEED_TV"]
 
 
 # Draws the two rackets
 def draw_rackets(display, red_y, blue_y):
+    RACKET_OFFSET = GameConfig.configs["game"]["RACKET_OFFSET"]
+
     # Red racket
-    pygame.draw.rect(display, RED, [display.get_width() / RACKET_OFFSET, red_y, racket_width, racket_height])
+    pygame.draw.rect(display, GameConfig.configs["colours"]["RIGHT_PLAYER"],
+                     [display.get_width() / RACKET_OFFSET, red_y, racket_width, racket_height])
     # Blue racket
-    pygame.draw.rect(display, BLUE, [display.get_width() - display.get_width() / RACKET_OFFSET, blue_y,
-                                     racket_width, racket_height])
+    pygame.draw.rect(display, GameConfig.configs["colours"]["LEFT_PLAYER"],
+                     [display.get_width() - display.get_width() / RACKET_OFFSET, blue_y, racket_width, racket_height])
 
 
 # Draw score at the top of the window
 def draw_score(display, red, blue):
     # Initialize the font used for the score
     font_width_ratio = 20
-    font_size = max(MIN_FONT_SIZE, int(display.get_width() / font_width_ratio))
-    score_font = pygame.font.Font(SCORE_FONT_PATH, font_size)
+    font_size = max(GameConfig.configs["fonts"]["MIN_FONT_SIZE"], int(display.get_width() / font_width_ratio))
+    score_font = pygame.font.Font(GameConfig.configs["fonts"]["SCORE_FONT_PATH"], font_size)
 
     # Render the messages for each score
-    red_msg = score_font.render(str(red), True, RED)
-    blue_msg = score_font.render(str(blue), True, BLUE)
-    colon_msg = score_font.render(":", True, WHITE)
+    red_msg = score_font.render(str(red), True, GameConfig.configs["colours"]["RIGHT_PLAYER"])
+    blue_msg = score_font.render(str(blue), True, GameConfig.configs["colours"]["LEFT_PLAYER"])
+    colon_msg = score_font.render(":", True, GameConfig.configs["colours"]["TEXT"])
 
     # Get the rectangles (rect) for each rendered text
     red_rect = red_msg.get_rect()
@@ -115,8 +119,8 @@ def draw_score(display, red, blue):
 def draw_message(display, string, colour):
     # Initialize the font used for the message
     font_width_ratio = 20
-    font_size = max(MIN_FONT_SIZE, int(display.get_width() / font_width_ratio))
-    system_font = pygame.font.Font(SYSTEM_FONT_PATH, font_size)
+    font_size = max(GameConfig.configs["fonts"]["MIN_FONT_SIZE"], int(display.get_width() / font_width_ratio))
+    system_font = pygame.font.Font(GameConfig.configs["fonts"]["SYSTEM_FONT_PATH"], font_size)
 
     # Render message
     msg = system_font.render(string, True, colour)
@@ -166,6 +170,8 @@ def border_collision(display, ball_y):
 
 # Check for collisions between the ball and one of rackets
 def racket_collision(display, ball_x, ball_y, red_y, blue_y):
+    RACKET_OFFSET = GameConfig.configs["game"]["RACKET_OFFSET"]
+
     # Check if the top or bottom pixels of the ball are at the same height of the received racket
     def check_vertical_intersection(y_racket):
         return (y_racket <= ball_y <= y_racket + racket_height or
@@ -188,6 +194,8 @@ def racket_collision(display, ball_x, ball_y, red_y, blue_y):
 # Check whether the ball has passed one of the rackets
 # Return the name of the team that has scored
 def point_scored(display, ball_x):
+    RACKET_OFFSET = GameConfig.configs["game"]["RACKET_OFFSET"]
+
     if ball_x < (display.get_width() / RACKET_OFFSET):
         return "blue"
     if ball_x > (display.get_width() - display.get_width() / RACKET_OFFSET) + racket_width:
@@ -196,10 +204,12 @@ def point_scored(display, ball_x):
 
 # Determine blue racket movement
 def AI_move(blue_y, ball_y):
+    AI_parameters = GameConfig.configs["ai"]
+
     global sleep_timer
 
     # Randomly make no movement
-    if random.random() < SKIP_PROB:
+    if random.random() < AI_parameters["SKIP_PROB"]:
         return 0
 
     # Force AI to sleep for a few cycles
@@ -212,25 +222,26 @@ def AI_move(blue_y, ball_y):
         ball_center = ball_y + ball_size / 2
 
         # Randomly sleep when the ball is moving towards opponent
-        if ball_x_speed < 0 and random.random() < SLEEP_PROB:
-            sleep_timer = random.randint(MIN_SLEEP, MAX_SLEEP)
+        if ball_x_speed < 0 and random.random() < AI_parameters["SLEEP_PROB"]:
+            sleep_timer = random.randint(AI_parameters["MIN_SLEEP"], AI_parameters["MAX_SLEEP"])
             return 0
 
         else:
-            movement = ((1000 / racket_speed) / FRAME_RATE)  # number of pixels that the AI can move per cycle
+            # Number of pixels that the AI can move per cycle
+            movement = ((1000 / racket_speed) / GameConfig.configs["game"]["FRAME_RATE"])
 
             if abs(racket_center - ball_center) < movement:  # avoid flickering
                 return 0
-            # blue racket is below the ball
+            # Blue racket is below the ball
             elif racket_center > ball_center:  # keep moving till the center of the racket is aligned
-                if random.random() < SPEED_PROB:
-                    return -movement * SPEED_PEN  # randomly reduce speed
+                if random.random() < AI_parameters["SPEED_PROB"]:
+                    return -movement * AI_parameters["SPEED_PEN"]  # randomly reduce speed
                 else:
                     return -movement
-            # blue racket is above the ball
+            # Blue racket is above the ball
             elif racket_center < ball_center:
-                if random.random() < SPEED_PROB:
-                    return movement * SPEED_PEN
+                if random.random() < AI_parameters["SPEED_PROB"]:
+                    return movement * AI_parameters["SPEED_PEN"]
                 else:
                     return movement
 
@@ -256,7 +267,7 @@ def adjust_movement(display_height, racket_y, movement):
 
 # Determine the movement of a racket for single player mode
 def single_player_move(display_height, red_y, keys):
-    movement = ((1000 / racket_speed) / FRAME_RATE)
+    movement = ((1000 / racket_speed) / GameConfig.configs["game"]["FRAME_RATE"])
 
     # Up arrow
     if keys[pygame.K_UP]:
@@ -270,7 +281,7 @@ def single_player_move(display_height, red_y, keys):
 
 # Determine the movement of the rackets for multiplayer mode
 def multiplayer_move(display_height, red_y, blue_y, keys):
-    movement = ((1000 / racket_speed) / FRAME_RATE)
+    movement = ((1000 / racket_speed) / GameConfig.configs["game"]["FRAME_RATE"])
 
     # Red movement
     # W (up movement)
@@ -297,6 +308,11 @@ def game_loop(display_width, display_height, multiplayer):
 
     ctypes.windll.user32.SetProcessDPIAware()  # ignore Windows' DPI Scaling
 
+    # Save useful configs
+    texts = GameConfig.configs["texts"]
+    colours = GameConfig.configs["colours"]
+    game_parameters = GameConfig.configs["game"]
+
     Mixer.play_background()  # start background music
 
     # Declare clock used to regulate game's speed
@@ -304,7 +320,7 @@ def game_loop(display_width, display_height, multiplayer):
 
     # Configure display
     display = pygame.display.set_mode((display_width, display_height))
-    pygame.display.set_caption(DISPLAY_CAPTION)
+    pygame.display.set_caption(texts["DISPLAY_CAPTION"])
 
     # Calculate parameters based on display's resolution
     calculate_dynamic_parameters(display)
@@ -323,12 +339,12 @@ def game_loop(display_width, display_height, multiplayer):
     while not game_close:
         # ask user what to do after game over
         while game_over:
-            display.fill(BLACK)
+            display.fill(colours["BACKGROUND"])
 
-            if red_score == MAX_POINTS:
-                draw_message(display, WIN_MESSAGE, WHITE)
+            if red_score == game_parameters["MAX_POINTS"]:
+                draw_message(display, texts["WIN_MESSAGE"], colours["TEXT"])
             else:
-                draw_message(display, LOSE_MESSAGE, WHITE)
+                draw_message(display, texts["LOSE_MESSAGE"], colours["TEXT"])
             pygame.display.update()
 
             # read key
@@ -381,7 +397,7 @@ def game_loop(display_width, display_height, multiplayer):
             if point == "red":
                 red_score += 1
                 Mixer.play_red_point()
-                if red_score == MAX_POINTS:
+                if red_score == game_parameters["MAX_POINTS"]:
                     game_over = True
                     Mixer.play_game_over("red")
                 else:
@@ -390,7 +406,7 @@ def game_loop(display_width, display_height, multiplayer):
             if point == "blue":
                 blue_score += 1
                 Mixer.play_blue_point()
-                if blue_score == MAX_POINTS:
+                if blue_score == game_parameters["MAX_POINTS"]:
                     game_over = True
                     Mixer.play_game_over("blue")
                 else:
@@ -411,13 +427,13 @@ def game_loop(display_width, display_height, multiplayer):
         ball_y += ball_y_speed
 
         # Draw entities
-        display.fill(BLACK)
+        display.fill(colours["BACKGROUND"])
         draw_rackets(display, red_y, blue_y)
-        pygame.draw.rect(display, WHITE, [ball_x, ball_y, ball_size, ball_size])  # draw ball
+        pygame.draw.rect(display, colours["BALL"], [ball_x, ball_y, ball_size, ball_size])  # draw ball
         draw_score(display, red_score, blue_score)
         pygame.display.update()
 
-        clock.tick(FRAME_RATE)
+        clock.tick(game_parameters["FRAME_RATE"])
 
     pygame.quit()
     quit()
