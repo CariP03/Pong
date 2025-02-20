@@ -198,7 +198,7 @@ def point_scored(display, ball_x):
 
     if ball_x < (display.get_width() / RACKET_OFFSET):
         return "blue"
-    if ball_x > (display.get_width() - display.get_width() / RACKET_OFFSET) + racket_width:
+    if ball_x + ball_size > (display.get_width() - display.get_width() / RACKET_OFFSET) + racket_width:
         return "red"
 
 
