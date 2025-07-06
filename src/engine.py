@@ -3,6 +3,7 @@ from music import Mixer
 import random
 import pygame
 import ctypes
+import platform
 
 # define global variables
 racket_width = 0
@@ -306,7 +307,8 @@ def multiplayer_move(display_height, red_y, blue_y, keys):
 def game_loop(display_width, display_height, multiplayer):
     global ball_x_speed
 
-    ctypes.windll.user32.SetProcessDPIAware()  # ignore Windows' DPI Scaling
+    if platform == "Windows":
+        ctypes.windll.user32.SetProcessDPIAware()  # ignore Windows' DPI Scaling
 
     # Save useful configs
     texts = GameConfig.configs["texts"]
