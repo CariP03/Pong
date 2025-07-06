@@ -34,7 +34,7 @@ class GameConfig:
         "game": {
             "FRAME_RATE": 30,
             "RACKET_OFFSET": 12,  # distance between a racket and a vertical border (as the screen's width divider)
-            "MAX_POINTS": 2,  # number of points necessary to win
+            "MAX_POINTS": 5,  # number of points necessary to win
         },
         "ratios": {
             "4:3": {
@@ -93,7 +93,7 @@ class GameConfig:
     configs = None
 
     # Path to the JSON settings file
-    __SETTINGS_FILE_PATH = "configs.json"
+    __SETTINGS_FILE_PATH = "src/configs.json"
 
     # Load configs from file
     @staticmethod

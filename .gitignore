@@ -1,1 +1,4 @@
-configs.json
+src/configs.json
+.idea
+__pycache__/
+*.pyc
